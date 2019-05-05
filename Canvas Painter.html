@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Paint The Canvas</title>
+	<link rel="icon" type="image/png" href="https://www.dropbox.com/s/aln6t25975bzipd/img.png?raw=1">
+	<style type="text/css">
+		table {border: 2px solid black;top: 300px;z-index: 5;border-collapse: collapse;}
+		th,td  {border: 2px solid black;text-align: center;padding: 3px;border-collapse: collapse;}
+	</style>
+</head>
+<body onload="checker()">
+<p align="center"><button onclick="newCanvas()">Clear Canvas</button></p>
+
+<p align="center">
+<canvas id="drawPad" width="1400" height="420" style="border: 1px solid black;cursor: pointer;" ontouchmove="pointerTouch(event)" ontouchend="end(event)" onmousemove="pointerMouse(event)" onmousedown="checkIn()" onmouseup="checkOut(event)" onmouseleave="checkNone()"></canvas>
+</p>
+<table align="center">
+	<tr>
+		<th>Choose Pen</th>
+		<th>Choose Color</th>
+		<th>Choose Size</th>
+	</tr>
+	<tr>
+		<td>Marker <input type="radio" name="penName" onchange="checker()" id="penSpecial" checked="1"></td>
+		<td>
+			<table align="center" id="guest" style="">
+				<tr>
+					<th>Color</th>
+					<th>Modify</th>
+					<th>Value</th>
+				</tr>
+				<tr>
+					<td>Red</td>
+					<td><input type="range" id="r" min="0" max="255" oninput="quickColor()" value="100"></td>
+					<td><span id="rVal"></span></td>
+				</tr>
+				<tr>
+					<td>Green</td>
+					<td><input type="range" id="g" min="0" max="255" oninput="quickColor()" value="100"></td>
+					<td><span id="gVal"></span></td>
+				</tr>
+				<tr>
+					<td>Blue</td>
+					<td><input type="range" id="b" min="0" max="255" oninput="quickColor()" value="100"></td>
+					<td><span id="bVal"></span></td>
+				</tr>
+				<tr>
+					<td>Alpha</td>
+					<td><input type="range" id="a" min="0" max="100" oninput="quickColor()" value="100"></td>
+					<td><span id="aVal"></span></td>
+				</tr>
+			</table>
+		</td>
+		<td>Width : <input type="range" id="penSize7" value="10" oninput="f7()" min="1"><span id="psVal7"></span></td>
+	</tr>
+	<tr>
+		<td>Dots <input type="radio" name="penName" onchange="checker()" id="penCircle"></td>
+		<td><input type="color" id="strClr1"></td>
+		<td>R.Size : <input type="range" id="penSize1" value="10" onmousemove="f1()" ontouchmove="f1()" min="1"><span id="psVal1"></span></td>
+	</tr>
+	<tr>
+		<td>Eraser <input type="radio" name="penName" onchange="checker()" id="penEraser"></td>
+		<td><input type="color" id="strClr2" value="#ffffff"></td>
+		<td>R.Size : <input type="range" id="penSize2" value="200" onmousemove="f2()" ontouchmove="f2()" min="1" max="1000"><span id="psVal2">501</span></td>
+	</tr>
+	<tr>
+		<td>HLPen <input type="radio" name="penName" onchange="checker()" id="penSquare"></td>
+		<td><input type="color" id="strClr3"></td>
+		<td>H.Size : <input type="range" id="penSize3" value="10" onmousemove="f3()" ontouchmove="f3()" min="1"><span id="psVal3"></span>
+		<br>
+		V.Size : <input type="range" id="penSize4" value="10" onmousemove="f4()" ontouchmove="f4()" min="1"><span id="psVal4"></span></td>
+	</tr>
+	<tr>
+		<td>Polygon (W.I.P) <input type="radio" name="penName" onchange="checker()" id="penLiner"></td>
+		<td><input type="color" id="strClr4"></td>
+		<td>Width : <input type="range" id="penSize5" value="10" onmousemove="f5()" ontouchmove="f5()" min="1"><span id="psVal5"></span></td>
+	</tr>
+	<tr>
+		<td>Pencil <input type="radio" name="penName" onchange="checker()" id="penSnake"></td>
+		<td><input type="color" id="strClr5"></td>
+		<td>Width : <input type="range" id="penSize6" value="10" onmousemove="f6()" ontouchmove="f6()" min="1"><span id="psVal6"></span></td>
+	</tr>
+</table>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Ad Sample -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-7508595684232142"
+     data-ad-slot="1576347314"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<script type="text/javascript">
+
+	console.log('Page Loaded');
+
+	var body = document.getElementsByTagName('body')[0];
+	var cdr = document.getElementById('drawPad').getContext('2d');
+	var r = document.getElementById('r');
+	var g = document.getElementById('g');
+	var b = document.getElementById('b');
+	var a = document.getElementById('a');
+	var box = document.getElementById('box');
+	var msd = n = 0;
+
+	var clickX = [];
+	var clickY = [];
+	var clickDrag = [];
+	var lastPt = null;
+
+
+	document.getElementById('rVal').innerHTML = r.value;
+
+	document.getElementById('gVal').innerHTML = g.value;
+
+	document.getElementById('bVal').innerHTML = b.value;
+
+	document.getElementById('aVal').innerHTML = (a.value/100);
+
+	document.getElementById('psVal1').innerHTML = penSize1.value;
+
+	document.getElementById('psVal2').innerHTML = penSize2.value;
+
+	document.getElementById('psVal3').innerHTML = penSize3.value;
+
+	document.getElementById('psVal4').innerHTML = penSize4.value;
+
+	document.getElementById('psVal5').innerHTML = penSize5.value;
+
+	document.getElementById('psVal6').innerHTML = penSize6.value;
+
+	document.getElementById('psVal7').innerHTML = penSize7.value;
+
+	document.getElementById('guest').style.backgroundColor =  "rgba("+r.value+", "+g.value+", "+b.value+", "+(a.value/100)+")";
+
+	function quickColor() {
+		var r = document.getElementById('r');
+		var g = document.getElementById('g');
+		var b = document.getElementById('b');
+		var a = document.getElementById('a');
+	
+		console.log("rgba("+r.value+", "+g.value+", "+b.value+", "+a.value+")");
+
+		document.getElementById('rVal').innerHTML = r.value;
+
+		document.getElementById('gVal').innerHTML = g.value;
+
+		document.getElementById('bVal').innerHTML = b.value;
+
+		document.getElementById('aVal').innerHTML = (a.value/100);
+
+		document.getElementById('guest').style.backgroundColor =  "rgba("+r.value+", "+g.value+", "+b.value+", "+(a.value/100)+")";
+	}
+
+	function f1() {document.getElementById('psVal1').innerHTML = penSize1.value;}
+
+	function f2() {document.getElementById('psVal2').innerHTML = penSize2.value;}
+
+	function f3() {document.getElementById('psVal3').innerHTML = penSize3.value;}
+
+	function f4() {document.getElementById('psVal4').innerHTML = penSize4.value;}
+
+	function f5() {document.getElementById('psVal5').innerHTML = penSize5.value;}
+
+	function f6() {document.getElementById('psVal6').innerHTML = penSize6.value;}
+
+	function f7() {document.getElementById('psVal7').innerHTML = penSize7.value;}
+
+	function checker() {
+		if (penCircle.checked == true) {
+			console.log('Check 1');
+			strClr1.disabled = penSize1.disabled = false;
+			r.disabled = g.disabled = b.disabled = a.disabled = penSize7.disabled = strClr2.disabled = penSize2.disabled = strClr3.disabled = penSize3.disabled = penSize4.disabled = penSize5.disabled = strClr4.disabled = penSize6.disabled = strClr5.disabled = true;
+		}
+		
+		if (penEraser.checked == true) {
+			console.log('Check 2');
+			strClr2.disabled = penSize2.disabled = false;
+			r.disabled = g.disabled = b.disabled = a.disabled = penSize7.disabled = strClr1.disabled = penSize1.disabled = strClr3.disabled = penSize3.disabled = penSize4.disabled = penSize5.disabled = strClr4.disabled = penSize6.disabled = strClr5.disabled = true;
+		}
+		
+		if (penSquare.checked == true) {
+			console.log('Check 3');
+			strClr3.disabled = penSize3.disabled = penSize4.disabled = false;
+			r.disabled = g.disabled = b.disabled = a.disabled = penSize7.disabled = strClr1.disabled = penSize1.disabled = strClr2.disabled = penSize2.disabled  = penSize5.disabled = strClr4.disabled = penSize6.disabled = strClr5.disabled = true;
+		}
+		
+		if (penLiner.checked == true) {
+			console.log('Check 4');
+			penSize5.disabled = strClr4.disabled = false;
+			r.disabled = g.disabled = b.disabled = a.disabled = penSize7.disabled = strClr1.disabled = penSize1.disabled = strClr2.disabled = penSize2.disabled = penSize6.disabled = strClr5.disabled = strClr3.disabled = penSize3.disabled = penSize4.disabled = true;
+		}		
+
+		if (penSnake.checked == true) {
+			console.log('Check 5');
+			penSize6.disabled = strClr5.disabled = false;
+			r.disabled = g.disabled = b.disabled = a.disabled = penSize7.disabled = strClr1.disabled = penSize1.disabled = strClr2.disabled = penSize2.disabled = strClr3.disabled = penSize3.disabled = penSize4.disabled = penSize5.disabled = strClr4.disabled = true;	
+		}
+		
+		if (penSpecial.checked == true) {
+			console.log('Check 6');
+			r.disabled = g.disabled = b.disabled = a.disabled = penSize7.disabled = false;
+			penSize6.disabled = strClr5.disabled = strClr1.disabled = penSize1.disabled = strClr2.disabled = penSize2.disabled = strClr3.disabled = penSize3.disabled = penSize4.disabled = penSize5.disabled = strClr4.disabled = true;
+		}
+
+}
+	
+	function checkIn() {
+		msd = 1;n++;
+		console.log('Pen Down');
+	}
+	
+	function checkOut(event) {
+		msd = 0;
+		console.log('Pen Up');
+		event.preventDefault();
+		lastPt = null;
+	}
+
+	function checkNone() {
+		msd = 0;
+		console.log('Pen Out')
+	}
+
+	function newCanvas() {
+		cdr.clearRect(0, 0, cdr.canvas.width, cdr.canvas.height);
+		console.log('Canvas cleared for this area : '+cdr.canvas.height+' by '+cdr.canvas.width+'');
+		clickX = []; clickY = [];
+	}
+
+	function pointerMouse(event) {
+
+		event.preventDefault();
+
+	//	console.log(event.clientX+", "+event.clientY);
+			if (msd == 1) {
+
+					x = event.clientX - document.getElementById('drawPad').offsetLeft /*cdr.canvas.width*/;
+			    	y = event.clientY - document.getElementById('drawPad').offsetTop /* cdr.canvas.height*/;
+
+			    	clickX.push(x);clickY.push(y);clickDrag.push(true);
+
+			    	console.log('Pen roaming at '+'('+x+', '+y+') and '+n+' times pen lifted');
+
+			    	if (penCircle.checked == true) {dotted(x, y);}
+
+					if (penEraser.checked == true) {eraser(x, y);}
+
+					if (penSquare.checked == true) {hiLitr(x, y);}
+
+					if (penSnake.checked == true) {snkrPen(x, y);}
+
+					if (penSpecial.checked == true) {noPen(x, y);}
+
+					if (penLiner.checked == true) {
+						brush(x, y);
+					//	console.log(clickX);
+					//	console.log(clickY);
+					//	console.log(n);
+					}
+
+
+			}
+			lastPt = {x:event.clientX - document.getElementById('drawPad').offsetLeft, y:event.clientY - document.getElementById('drawPad').offsetTop}; 
+	}
+
+	function pointerTouch(e) {
+
+        e.preventDefault();
+
+	//	console.log(event.touches[0].pageX+", "+event.touches[0].pageY);
+
+        if(lastPt!=null) {
+	    	 x = e.touches[0].pageX - document.getElementById('drawPad').offsetLeft; 
+	    	 y = e.touches[0].pageY - document.getElementById('drawPad').offsetTop;
+
+		    	if (penCircle.checked == true) {dotted(x, y);}
+
+				if (penEraser.checked == true) {eraser(x, y);}
+
+				if (penSquare.checked == true) {hiLitr(x, y);}
+
+				if (penSnake.checked == true) {snkrPen(x, y);}
+
+				if (penSpecial.checked == true) {noPen(x, y);}
+
+				if (penLiner.checked == true) {
+					brush(x, y);
+					clickX.push(x);clickY.push(y);clickDrag.push(true);
+				//	console.log(clickX);
+				//	console.log(clickY);
+				//	console.log(n);
+				}
+
+				
+	        }
+
+        	lastPt = {x:e.touches[0].pageX - document.getElementById('drawPad').offsetLeft, y:e.touches[0].pageY - document.getElementById('drawPad').offsetTop};    
+    }
+ 
+    function end(e) {e.preventDefault(); lastPt=null;}
+
+    function brush(x, y) {
+		console.log('Drawing With Brush at '+'('+x+', '+y+')');
+        
+        cdr.lineWidth = penSize5.value;
+		cdr.strokeStyle = strClr4.value;
+		cdr.lineJoin = "round";
+
+		for(var i=0; i < clickX.length; i++) {		
+		    cdr.beginPath();
+		    if(clickDrag[i] && i) {cdr.moveTo(clickX[i-1], clickY[i-1]);}
+		    else {cdr.moveTo(clickX[i]-1, clickY[i]);}
+			cdr.lineTo(clickX[i], clickY[i]);
+		    cdr.closePath();
+		    cdr.stroke();
+		}
+	}
+
+	function snkrPen(x, y) {
+		cdr.lineWidth = penSize6.value;
+		cdr.strokeStyle = strClr5.value;
+		console.log('Drawing Snake on phone at '+'('+x+', '+y+')');
+
+		cdr.beginPath();
+		cdr.moveTo(lastPt.x, lastPt.y);
+		cdr.lineTo(x, y);
+		cdr.stroke();
+	}
+
+	function dotted(x, y) {
+		console.log ('Drawing With Dots at '+'('+x+', '+y+')');
+		cdr.strokeStyle = strClr1.value;
+		cdr.beginPath();
+		cdr.arc(x, y, penSize1.value, 0, 2*Math.PI);
+		cdr.stroke();
+		cdr.fillStyle = strClr1.value;
+		cdr.fill();
+	}
+
+	function eraser(x, y) {
+		console.log('Drawing With Eraser at '+'('+x+', '+y+')');
+		cdr.strokeStyle = strClr2.value;
+		cdr.beginPath();
+		cdr.arc(x, y, penSize2.value, 0, 2*Math.PI);
+		cdr.stroke();
+		cdr.fillStyle = strClr2.value;
+		cdr.fill();
+	}
+
+	function hiLitr(x, y) {
+		console.log('Drawing With Calligraphy at '+'('+x+', '+y+')');
+		cdr.beginPath();
+		cdr.strokeStyle = strClr3.value;
+		cdr.rect(x, y, penSize3.value, penSize4.value);
+		cdr.stroke();
+		cdr.fillStyle = strClr3.value;
+		cdr.fill();
+	}
+
+	function noPen(x, y) {
+		console.log('Drawing With Magic at '+'('+x+', '+y+')');
+		cdr.strokeStyle = "rgba("+r.value+", "+g.value+", "+b.value+", "+(a.value/100)+")";
+		cdr.beginPath();
+		cdr.arc(x, y, penSize7.value, 0, 2*Math.PI);
+		cdr.stroke();
+		cdr.fillStyle = "rgba("+r.value+", "+g.value+", "+b.value+", "+(a.value/100)+")";
+		cdr.fill();
+	}
+</script>
+</body>
+</html>
